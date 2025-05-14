@@ -1,0 +1,1 @@
+cc -c qInterceptor.c -g -o qInterceptor.o
