@@ -1,7 +1,10 @@
 1. Compile with ./compile.sh
 2. Link your project with qInterceptor.o
-3. Declare the following prototype in the same file as your main function: void qInterceptorInit()
-4. Call qInterceptorInit() at the beginning of your main function
+
+~3. Declare the following prototype in the same file as your main function: void qInterceptorInit()~
+
+~4. Call qInterceptorInit() at the beginning of your main function~
+
 5. Enjoy helpful leak information when your program exits!
 
 Additional features:
