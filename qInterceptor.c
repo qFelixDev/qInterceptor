@@ -13,6 +13,7 @@ typedef struct allocation_list_s {
 } allocation_t;
 
 static struct {
+	bool isInitialized;
 	void* (*std_malloc)(size_t);
 	void* (*std_realloc)(void*, size_t);
 	void (*std_free)(void*);
@@ -47,7 +48,8 @@ static void report() {
 	pthread_mutex_destroy(&interceptor.mutex);
 }
 
-void qInterceptorInit() {
+static void initialize() {
+	interceptor.isInitialized = true;
 	interceptor.std_malloc = dlsym(RTLD_NEXT, "malloc");
 	interceptor.std_realloc = dlsym(RTLD_NEXT, "realloc");
 	interceptor.std_free = dlsym(RTLD_NEXT, "free");
@@ -61,6 +63,8 @@ void qInterceptorInit() {
 
 void* malloc(size_t size) {
 	pthread_mutex_lock(&interceptor.mutex);
+	if(!interceptor.isInitialized)
+		initialize();
 	if(*interceptor.failures != '\0') {
 		if(*interceptor.failures == '1') {
 			interceptor.failures++;
@@ -84,6 +88,8 @@ void free(void* pointer) {
 	if(pointer == NULL)
 		return;
 	pthread_mutex_lock(&interceptor.mutex);
+	if(!interceptor.isInitialized)
+		initialize();
 	allocation_t* allocation = interceptor.allocations;
 	if(allocation != NULL) {
 		if(allocation -> pointer == pointer) {
@@ -117,6 +123,8 @@ void* realloc(void* pointer, size_t size) {
 		return NULL;
 	}
 	pthread_mutex_lock(&interceptor.mutex);
+	if(!interceptor.isInitialized)
+		initialize();
 	if(*interceptor.failures != '\0') {
 		if(*interceptor.failures == '1') {
 			interceptor.failures++;
